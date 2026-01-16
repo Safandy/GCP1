@@ -24,6 +24,13 @@ jobs:
         #echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
 
+    - name: Decode GCP service account key
+      run: |
+       echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > $HOME/gcp-key.json
+
+    - name: Set environment variable for Terraform
+      run: |
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
     - name: Terraform Init
       run: terraform init
