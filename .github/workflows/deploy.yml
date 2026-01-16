@@ -27,11 +27,11 @@ jobs:
 
     - name: Terraform Init
       run: terraform init
-      working-directory: GCP1
+      working-directory: .
     
     - name: Terraform Apply
       run: terraform apply -auto-approve
-      working-directory: GCP1
+      working-directory: .
     - name: Sleep for 30 seconds
       run: sleep 90
 
@@ -42,7 +42,7 @@ jobs:
         echo "VM_NAME=$(terraform output -raw vm_name)" >> $GITHUB_ENV
         echo "VM_ZONE=$(terraform output -raw vm_zone)" >> $GITHUB_ENV
         echo "VM_IP=$(terraform output -raw vm_ip)" >> $GITHUB_ENV
-      working-directory: GCP1
+      working-directory: .
     
     - name: Wait for VM to be ready
       run: |
