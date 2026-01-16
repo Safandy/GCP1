@@ -53,7 +53,7 @@ resource "google_compute_instance" "iac-project-cicd-server2" {
   }
 
   service_account {
-    email  = "sa-64-897@gcp-cicd.iam.gserviceaccount.com"
+    email  = "gcp-cicd@gcp1-484519.iam.gserviceaccount.com"
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
 
