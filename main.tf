@@ -67,5 +67,14 @@ resource "google_compute_instance" "iac-project-cicd-server2" {
 
   tags = ["http-server", "https-server"]
   zone = "us-east1-b"
+
+    metadata_startup_script = <<-EOF
+    #!/bin/bash
+    apt-get update -y
+    apt-get install -y nginx
+    systemctl enable nginx
+    systemctl start nginx
+  EOF
+
 }
 
