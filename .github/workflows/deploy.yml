@@ -18,7 +18,7 @@ jobs:
 
     #- name: Authenticate to GCP
      # run: |
-      #  echo "${{ secrets.GCP_KEY_B64 }}" | base64 --decode > $HOME/gcp-key.json
+      # echo "${{ secrets.GCP_KEY_B64 }}" | base64 --decode > $HOME/gcp-key.json
        # gcloud auth activate-service-account --key-file=$HOME/gcp-key.json
         #gcloud config set project gcp-cicd
         #echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
