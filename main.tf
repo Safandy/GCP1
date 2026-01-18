@@ -5,7 +5,7 @@ variable "zone" {
 }
 
 provider "google" {
-  project = "gcp-cicd"   
+  project = "gcp1-484519"   
   region  = "us-east1"
   zone    = "us-east1-b"    
 }
@@ -42,7 +42,9 @@ resource "google_compute_instance" "iac-project-cicd-server2" {
 
     queue_count = 0
     stack_type  = "IPV4_ONLY"
-    subnetwork  = "projects/gcp-cicd/regions/us-east1/subnetworks/default"
+    subnetwork  = "default"
+
+    #subnetwork  = "projects/gcp-cicd/regions/us-east1/subnetworks/default"
   }
 
   scheduling {
