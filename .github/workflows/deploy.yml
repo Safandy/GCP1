@@ -45,11 +45,11 @@ jobs:
 
     - name: Capture Terraform Outputs
       id: tf_outputs
-      run: |
-        echo "VM_NAME=$(terraform output -raw vm_name)" >> $GITHUB_ENV
-        echo "VM_ZONE=$(terraform output -raw vm_zone)" >> $GITHUB_ENV
-        echo "VM_IP=$(terraform output -raw vm_ip)" >> $GITHUB_ENV
-      working-directory: .
+      #run: |
+      #  echo "VM_NAME=$(terraform output -raw vm_name)" >> $GITHUB_ENV
+      #  echo "VM_ZONE=$(terraform output -raw vm_zone)" >> $GITHUB_ENV
+      # echo "VM_IP=$(terraform output -raw vm_ip)" >> $GITHUB_ENV
+       working-directory: .
     
     - name: Wait for VM to be ready
       run: |
