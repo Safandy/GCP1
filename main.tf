@@ -69,46 +69,70 @@ resource "google_compute_instance" "cicd-vm" {
 
   metadata_startup_script = <<-EOF
     #!/bin/bash
-    set -e
+    set -euxo pipefail
+    LOG=/var/log/startup-script.log
+   exec > >(tee -a $LOG) 2>&1
+
    #install nginx
+    
+echo "===== Startup script started ====="
 
+# ---------- System prep ----------
     apt-get update -y
-    apt-get install -y nginx
-    systemctl enable nginx
-    systemctl start nginx
+apt-get install -y \
+  ca-certificates \
+  curl \
+  gnupg \
+  lsb-release \
+  apt-transport-https \
+  software-properties-common
 
-    # Install Java (required for Jenkins & SonarQube)
-    apt-get install -y openjdk-17-jdk
+# ---------- Java (required for Jenkins & Sonar) ----------
+apt-get install -y openjdk-17-jdk
 
-    # Install Docker
-    apt-get install -y docker.io
-    systemctl enable docker
-    systemctl start docker
+# ---------- NGINX ----------
+apt-get install -y nginx
+systemctl enable nginx
+systemctl start nginx
 
-    # Install Jenkins
-    curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key | tee \
-      /usr/share/keyrings/jenkins-keyring.asc > /dev/null
+# ---------- Docker ----------
+apt-get install -y docker.io
+systemctl enable docker
+systemctl start docker
+usermod -aG docker ubuntu || true
 
-    echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-      https://pkg.jenkins.io/debian-stable binary/ | tee \
-      /etc/apt/sources.list.d/jenkins.list > /dev/null
+# Wait for Docker to be ready
+until docker info >/dev/null 2>&1; do
+  echo "Waiting for Docker..."
+  sleep 3
+done
 
-    apt-get update -y
-    apt-get install -y jenkins
-    systemctl enable jenkins
-    systemctl start jenkins
+# ---------- Jenkins ----------
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key \
+  | gpg --dearmor \
+  | tee /usr/share/keyrings/jenkins.gpg > /dev/null
 
-    # Run SonarQube with Docker
-    docker run -d --name sonarqube \
-      -p 9000:9000 \
-      sonarqube:lts
-    NGINX_CONF
+echo deb [signed-by=/usr/share/keyrings/jenkins.gpg] \
+  https://pkg.jenkins.io/debian-stable binary/ \
+  > /etc/apt/sources.list.d/jenkins.list
 
-  ln -sf /etc/nginx/sites-available/cicd /etc/nginx/sites-enabled/cicd
-  rm -f /etc/nginx/sites-enabled/default
+apt-get update -y
+apt-get install -y jenkins
+systemctl enable jenkins
+systemctl start jenkins
 
-  systemctl reload nginx  
-  EOF
+# ---------- SonarQube ----------
+sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+
+docker run -d \
+  --name sonarqube \
+  -p 9000:9000 \
+  --restart unless-stopped \
+  sonarqube:lts
+
+echo "===== Startup script completed successfully ====="
+EOF
 }
 resource "google_compute_firewall" "allow_ci_ports" {
   name    = "allow-ci-ports"
