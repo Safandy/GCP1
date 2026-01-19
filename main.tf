@@ -1,9 +1,6 @@
 # This code is compatible with Terraform 4.25.0 and versions that are backward compatible to 4.25.0.
 # For information about validating this Terraform code, see https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/google-cloud-platform-build#format-and-validate-the-configuration
-#variable "zone" {
- # default = "us-east1"
-#}
-
+ 
 provider "google" {
   project = "gcp1-484519"   
   region  = "us-east1"
@@ -107,14 +104,12 @@ until docker info >/dev/null 2>&1; do
   sleep 3
 done
 
-# ---------- Jenkins ----------
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io.key \
-  | gpg --dearmor \
-  | tee /usr/share/keyrings/jenkins.gpg > /dev/null
+# ---------- Jenkins (FIXED for Debian 12) ----------
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
+  | sudo gpg --dearmor -o /usr/share/keyrings/jenkins.gpg
 
-echo deb [signed-by=/usr/share/keyrings/jenkins.gpg] \
-  https://pkg.jenkins.io/debian-stable binary/ \
-  > /etc/apt/sources.list.d/jenkins.list
+echo "deb [signed-by=/usr/share/keyrings/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/" \
+  | sudo tee /etc/apt/sources.list.d/jenkins.list
 
 apt-get update -y
 apt-get install -y jenkins
