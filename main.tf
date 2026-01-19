@@ -96,7 +96,7 @@ systemctl start nginx
 apt-get install -y docker.io
 systemctl enable docker
 systemctl start docker
-usermod -aG docker ubuntu || true
+usermod -aG docker $USER || true
 
 # Wait for Docker to be ready
 until docker info >/dev/null 2>&1; do
