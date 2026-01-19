@@ -92,11 +92,14 @@ apt-get install -y nginx
 systemctl enable nginx
 systemctl start nginx
 
-# ---------- Docker ----------
-apt-get install -y docker.io
-systemctl enable docker
-systemctl start docker
-usermod -aG docker $USER || true
+# Determine username safely
+if whoami &>/dev/null; then
+    USERNAME=$(whoami)
+else
+    USERNAME="sandysakr2"
+fi
+# Add user to docker group, ignore errors if user doesn't exist
+usermod -aG docker "$USERNAME" || true
 
 # Wait for Docker to be ready
 until docker info >/dev/null 2>&1; do
