@@ -75,8 +75,8 @@ resource "google_compute_instance" "cicd-vm" {
 echo "===== Startup script started ====="
 
 # ---------- System prep ----------
-    apt-get update -y
-apt-get install -y \
+  apt-get update -y
+  apt-get install -y  \
   ca-certificates \
   curl \
   gnupg \
@@ -98,13 +98,21 @@ if whoami &>/dev/null; then
 else
     USERNAME="sandysakr2"
 fi
+
 # Add user to docker group, ignore errors if user doesn't exist
+USERNAME=$(whoami || echo "root")
 usermod -aG docker "$USERNAME" || true
 
 # Wait for Docker to be ready
-until docker info >/dev/null 2>&1; do
-  echo "Waiting for Docker..."
-  sleep 3
+MAX_RETRIES=10
+for i in $(seq 1 $MAX_RETRIES); do
+    if docker info >/dev/null 2>&1; then
+        echo "Docker is ready!"
+        break
+    else
+        echo "Waiting for Docker..."
+        sleep 3
+    fi
 done
 
 # ---------- Jenkins (FIXED for Debian 12) ----------
