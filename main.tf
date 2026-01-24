@@ -12,7 +12,7 @@ resource "google_compute_instance" "cicd-vm" {
     device_name = "cicd-vm"
     
     initialize_params {
-      image = "debian-cloud/debian-12"
+      image = "projects/ubuntu-os-cloud/global/images/family/ubuntu-2204-lts"
       size  = 10
       type  = "pd-standard"
     }

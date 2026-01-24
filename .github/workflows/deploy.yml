@@ -1,4 +1,4 @@
-name: Deploy VM and run nginx, Jenkins&SonarQube
+name: Deploy VM and run nginx, Jenkins& SonarQube
 
 on:
   workflow_dispatch:
