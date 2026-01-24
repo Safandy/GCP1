@@ -70,7 +70,7 @@ resource "google_compute_instance" "cicd-vm" {
     LOG=/var/log/startup-script.log
    exec > >(tee -a $LOG) 2>&1
 
-   #install nginx
+
     
 echo "===== Startup script started ====="
 
@@ -83,6 +83,16 @@ echo "===== Startup script started ====="
   lsb-release \
   apt-transport-https \
   software-properties-common
+
+echo "=== Cleaning up old Jenkins keyrings and repo entries ==="
+sudo rm -f /usr/share/keyrings/jenkins*.gpg
+sudo rm -f /etc/apt/sources.list.d/jenkins.list
+
+echo "=== Adding the new Jenkins 2026 GPG key ==="
+sudo mkdir -p /usr/share/keyrings
+curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key \
+    | sudo gpg --dearmor -o /usr/share/keyrings/jenkins-keyring.gpg
+sudo chmod 644 /usr/share/keyrings/jenkins-keyring.gpg
 
 # ---------- Java (required for Jenkins & Sonar) ----------
 apt-get install -y openjdk-17-jdk
@@ -116,16 +126,22 @@ for i in $(seq 1 $MAX_RETRIES); do
 done
 
 # ---------- Jenkins (FIXED for Debian 12) ----------
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key \
-  | sudo gpg --dearmor -o /usr/share/keyrings/jenkins.gpg
+echo "=== Adding Jenkins repository ==="
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/" \
+    | sudo tee /etc/apt/sources.list.d/jenkins.list
 
-echo "deb [signed-by=/usr/share/keyrings/jenkins.gpg] https://pkg.jenkins.io/debian-stable binary/" \
-  | sudo tee /etc/apt/sources.list.d/jenkins.list
+echo "=== Updating apt again to include Jenkins repo ==="
+sudo apt-get update -y
 
-apt-get update -y
-apt-get install -y jenkins
-systemctl enable jenkins
-systemctl start jenkins
+echo "=== Installing Jenkins ==="
+sudo apt-get install -y jenkins
+
+echo "=== Starting and enabling Jenkins service ==="
+sudo systemctl enable --now jenkins
+
+echo "=== Jenkins setup completed! ==="
+sudo systemctl status jenkins --no-pager
+sudo systemctl start jenkins 
 
 # ---------- SonarQube ----------
 sysctl -w vm.max_map_count=262144
